@@ -1,0 +1,12 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.db-journal
+.DS_Store
+*.log
+.idea/
+.vscode/
