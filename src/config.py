@@ -41,7 +41,9 @@ def _csv_int(name: str) -> set[int]:
 
 class Config:
     BOT_TOKEN: str = _required("TELEGRAM_BOT_TOKEN_DELIVERY_ETA")
-    GOOGLE_API_KEY: str = _required("GOOGLE_API_KEY_DELIVERY_ETA")
+    # GOOGLE key is optional at boot. If empty, bot starts and saves lists,
+    # but route building fails with a clear message in chat.
+    GOOGLE_API_KEY: str = os.environ.get("GOOGLE_API_KEY_DELIVERY_ETA", "").strip()
     CHAT_ID: int = int(_required("CHAT_ID_DELIVERY_ETA"))
     SHOP_ADDRESS: str = _required("SHOP_ADDRESS_DELIVERY_ETA")
 

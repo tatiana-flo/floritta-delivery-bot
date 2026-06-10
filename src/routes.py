@@ -147,6 +147,12 @@ async def build_route_text(
     """Returns ready-to-send Telegram message text with the route + ETAs."""
     if not stops:
         return "⚠️ Нет посткодов для расчёта."
+    if not api_key or len(api_key) < 20:
+        return (
+            "⚠️ GOOGLE_API_KEY_DELIVERY_ETA не задан.\n"
+            "Открой Railway → Variables → добавь переменную GOOGLE_API_KEY_DELIVERY_ETA "
+            "с ключом Google Routes API. Бот рестартует и будет готов."
+        )
 
     addresses = [shop_address] + [f"{s.code}, London, UK" for s in stops]
     matrix_or_err = await _compute_matrix(api_key, addresses)
