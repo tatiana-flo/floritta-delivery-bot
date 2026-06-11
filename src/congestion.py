@@ -109,26 +109,13 @@ def is_charging_at(when: datetime) -> bool:
 
 
 def is_charging_at_with_buffer(when: datetime) -> bool:
-    """Same as is_charging_at but with a 5-min buffer before 18:00 — so a stop
-    at 17:58 still counts as 'in charging hours' even if real arrival might
-    slip to 18:01.
+    """Alias kept for clarity — currently identical to is_charging_at.
+
+    Originally intended for a safety buffer around 18:00, but the boundary
+    behaviour turned out to be misleading for the user. We now treat ETAs at
+    face value: ETA < 18:00 = charging, ETA >= 18:00 = free.
     """
-    if is_christmas_break(when):
-        return False
-    weekday = when.weekday()
-    t = when.time()
-    end_with_buffer = time(
-        WEEKDAY_CHARGE_END.hour,
-        WEEKDAY_CHARGE_END.minute - SAFETY_MIN_AFTER_18 if WEEKDAY_CHARGE_END.minute >= SAFETY_MIN_AFTER_18
-        else 0,
-    )
-    if weekday < 5:
-        if WEEKDAY_CHARGE_START <= t < end_with_buffer:
-            return True
-    else:
-        if WEEKEND_CHARGE_START <= t < end_with_buffer:
-            return True
-    return False
+    return is_charging_at(when)
 
 
 def hours_label(when: datetime) -> str:
