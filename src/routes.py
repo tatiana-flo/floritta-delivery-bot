@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 import httpx
 
 from .classifier import Stop
+from .congestion import StopSchedule, summarize as ccz_summarize
 
 
 ROUTES_MATRIX_URL = "https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix"
@@ -172,6 +173,7 @@ async def build_route_text(
     ]
 
     cum_min = 0
+    schedule_for_ccz: list[StopSchedule] = []
     for i, ss in enumerate(ordered, start=1):
         drive_min = max(1, round(ss.drive_sec / 60))
         cum_min += drive_min + parking_min
@@ -182,6 +184,9 @@ async def build_route_text(
             f"{i}. {ss.stop.code}{flag}{note} — ETA {_format_time(eta)}  "
             f"({drive_min}+{parking_min} мин)"
         )
+        schedule_for_ccz.append(
+            StopSchedule(code=ss.stop.code, arrival=eta, priority=ss.stop.priority)
+        )
 
     return_min = max(1, round(return_sec / 60))
     cum_min += return_min
@@ -189,5 +194,10 @@ async def build_route_text(
     lines.append(f"🏠 Возврат в магазин — ETA {_format_time(back)}  (+{return_min} мин)")
     lines.append("")
     lines.append(f"Всего: {cum_min} мин (с паркингом).")
+
+    # Congestion Charge Zone summary (London-specific)
+    ccz = ccz_summarize(schedule_for_ccz)
+    lines.append("")
+    lines.extend(ccz.message_lines)
 
     return "\n".join(lines)
